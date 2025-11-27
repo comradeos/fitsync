@@ -1,4 +1,5 @@
 services:
+
   postgres:
     image: postgres:15
     environment:
@@ -41,14 +42,12 @@ services:
       - minio:/data
 
   gateway:
-    build:
-      context: ./gateway
+    build: ./gateway
+    volumes:
+      - ./gateway:/var/www
     ports:
       - "8080:8080"
-    depends_on:
-      - postgres
-      - redis
-    networks: [backend]
+    command: php -S 0.0.0.0:8080 -t public
 
   devices:
     build:
