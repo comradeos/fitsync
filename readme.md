@@ -110,7 +110,7 @@ fitsync/
 
 ---
 
-# ⚙️ Deployment Guide (Fresh Clone)
+# Deployment Guide (Fresh Clone)
 
 ### 1. Clone
 
