@@ -100,12 +100,18 @@ fresh:
 	make init
 
 backup-postgres:
-	docker run --rm -v pgdata:/data -v $(PWD)/backup:/backup busybox tar czf /backup/pgdata.tar.gz /data
+	docker compose stop postgres
+	mkdir -p backup
+	docker run --rm -v fitsync_pgdata:/data -v $(PWD)/backup:/backup busybox \
+		sh -c "tar czf - /data | split -b 1024m - /backup/pgdata.tar.gz.part-"
+	docker compose start postgres
 
 restore-postgres:
 	docker compose stop postgres
-	docker run --rm -v pgdata:/data -v $(PWD)/backup:/backup busybox sh -c "rm -rf /data/* && tar xzf /backup/pgdata.tar.gz -C /"
-	docker compose start postgres
+	docker run --rm -v fitsync_pgdata:/data busybox sh -c "rm -rf /data/*"
+	cat backup/pgdata.tar.gz.part-* \
+		| docker run --rm -i -v fitsync_pgdata:/data busybox tar xzf - -C /
+	docker compose up -d postgres
 
 backup-minio:
 	docker run --rm -v minio:/data -v $(PWD)/backup:/backup busybox tar czf /backup/minio.tar.gz /data
