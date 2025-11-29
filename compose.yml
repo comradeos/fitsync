@@ -10,13 +10,15 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    networks: [backend]
+    networks:
+      - backend
 
   redis:
     image: redis:7
     ports:
       - "6379:6379"
-    networks: [backend]
+    networks:
+      - backend
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -26,7 +28,8 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
-    networks: [backend]
+    networks:
+      - backend
 
   minio:
     image: minio/minio
@@ -37,7 +40,8 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    networks: [backend]
+    networks:
+      - backend
     volumes:
       - minio:/data
 
@@ -48,6 +52,10 @@ services:
     ports:
       - "8080:8080"
     command: php -S 0.0.0.0:8080 -t public
+    networks:
+      - backend
+    depends_on:
+      - postgres
 
   devices:
     build:
@@ -55,21 +63,24 @@ services:
     depends_on:
       - postgres
       - rabbitmq
-    networks: [backend]
+    networks:
+      - backend
 
   notifier:
     build:
       context: ./notifier
     depends_on:
       - rabbitmq
-    networks: [backend]
+    networks:
+      - backend
 
   analytics:
     build:
       context: ./analytics
     depends_on:
       - rabbitmq
-    networks: [backend]
+    networks:
+      - backend
 
 networks:
   backend:

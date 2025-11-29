@@ -114,3 +114,12 @@ restore-minio:
 	docker compose stop minio
 	docker run --rm -v minio:/data -v $(PWD)/backup:/backup busybox sh -c "rm -rf /data/* && tar xzf /backup/minio.tar.gz -C /"
 	docker compose start minio
+
+migrations-diff:
+	docker compose exec gateway php bin/console doctrine:migrations:diff
+
+migrations-migrate:
+	docker compose exec gateway php bin/console doctrine:migrations:migrate --no-interaction
+
+migrations-status:
+	docker compose exec gateway php bin/console doctrine:migrations:status
