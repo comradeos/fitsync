@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class UserController
 {
+    /** @noinspection PhpUnused */
     #[Route('/users', name: 'users_list', methods: ['GET'])]
     public function usersList(UserService $service): JsonResponse
     {

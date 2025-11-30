@@ -7,6 +7,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class HealthController
 {
+    /** @noinspection PhpUnused */
     #[Route('/health', name: 'health', methods: ['GET'])]
     public function health(): JsonResponse
     {
