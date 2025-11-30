@@ -21,7 +21,7 @@ class User
 
     #[ORM\Column(type: "datetime_immutable")]
     private \DateTimeImmutable $createdAt;
-    
+
     public function __construct(string $email, string $name)
     {
         $this->email = $email;
@@ -33,4 +33,13 @@ class User
     public function getEmail(): string { return $this->email; }
     public function getName(): string { return $this->name; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function toArray(): array
+    {
+        return [
+            'id'        => $this->id,
+            'email'     => $this->email,
+            'name'      => $this->name,
+            'createdAt' => $this->createdAt?->format('Y-m-d H:i:s'),
+        ];
+    }
 }
