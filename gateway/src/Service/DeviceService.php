@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Service;
 
 use App\DTO\Device\CreateDeviceRequest;
@@ -12,12 +11,10 @@ use Doctrine\ORM\EntityManagerInterface;
 readonly class DeviceService
 {
     public function __construct(
-        private DeviceRepository       $repository,
-        private UserService            $userService,
+        private DeviceRepository $repository,
+        private UserService $userService,
         private EntityManagerInterface $em
-    )
-    {
-    }
+    ) {}
 
     /**
      * @return ?object
@@ -47,25 +44,40 @@ readonly class DeviceService
         }
 
         $user = $this->userService->get($dto->userId);
-
         if (!$user) {
             return "User not found";
         }
 
         if (!$dto->type) {
-            return "Device type is required";
+            return "Type is required";
+        }
+
+        if (strlen($dto->type) < 2) {
+            return "Type must be at least 2 characters";
         }
 
         if (!$dto->model) {
-            return "Device model is required";
+            return "Model is required";
+        }
+
+        if (strlen($dto->model) < 2) {
+            return "Model must be at least 2 characters";
         }
 
         if (!$dto->externalId) {
-            return "external_id is required";
+            return "externalId is required";
         }
 
         if ($this->getByExternalId($dto->externalId)) {
-            return "externalId already exists";
+            return "external_id already exists";
+        }
+
+        if (strlen($dto->type) > 50) {
+            return "Type cannot exceed 50 characters";
+        }
+
+        if (strlen($dto->model) > 100) {
+            return "Model cannot exceed 100 characters";
         }
 
         return null;
@@ -73,12 +85,22 @@ readonly class DeviceService
 
     public function validateUpdate(UpdateDeviceRequest $dto): ?string
     {
-        if ($dto->type !== null && strlen($dto->type) < 2) {
-            return "Type must be at least 2 characters";
+        if ($dto->type !== null) {
+            if ($dto->type === "") {
+                return "Type cannot be empty";
+            }
+            if (strlen($dto->type) < 2) {
+                return "Type must be at least 2 characters";
+            }
         }
 
-        if ($dto->model !== null && strlen($dto->model) < 2) {
-            return "Model must be at least 2 characters";
+        if ($dto->model !== null) {
+            if ($dto->model === "") {
+                return "Model cannot be empty";
+            }
+            if (strlen($dto->model) < 2) {
+                return "Model must be at least 2 characters";
+            }
         }
 
         return null;

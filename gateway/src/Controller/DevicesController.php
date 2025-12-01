@@ -11,15 +11,14 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DevicesController
 {
-    #[Route('/devices', name: 'devices_list', methods: ['GET'])]
+    #[Route('/devices', methods: ['GET'])]
     public function list(DeviceService $service): JsonResponse
     {
         $devices = $service->getAll();
-        $data = array_map(fn($d) => $d->toArray(), $devices);
-        return new JsonResponse($data);
+        return new JsonResponse(array_map(fn($d) => $d->toArray(), $devices));
     }
 
-    #[Route('/devices', name: 'devices_create', methods: ['POST'])]
+    #[Route('/devices', methods: ['POST'])]
     public function create(Request $request, DeviceService $service): JsonResponse
     {
         $data = $request->toArray();
@@ -31,48 +30,43 @@ class DevicesController
         $dto->externalId = $data['external_id'] ?? null;
 
         $error = $service->validateCreate($dto);
-
         if ($error !== null) {
-            return new JsonResponse(['error' => $error]);
+            return new JsonResponse(['error' => $error], 400);
         }
 
         $device = $service->create($dto);
-
-        return new JsonResponse($device->toArray());
+        return new JsonResponse($device->toArray(), 201);
     }
 
-    #[Route('/devices/{id}', name: 'devices_update', methods: ['PUT'])]
+    #[Route('/devices/{id}', methods: ['PUT'])]
     public function update(int $id, Request $request, DeviceService $service): JsonResponse
     {
         $device = $service->get($id);
-
         if (!$device) {
-            return new JsonResponse(['error' => 'Device not found']);
+            return new JsonResponse(['error' => 'Device not found'], 404);
         }
 
         $data = $request->toArray();
-
         $dto = new UpdateDeviceRequest();
         $dto->type  = $data['type'] ?? null;
         $dto->model = $data['model'] ?? null;
 
         $error = $service->validateUpdate($dto);
         if ($error !== null) {
-            return new JsonResponse(['error' => $error]);
+            return new JsonResponse(['error' => $error], 400);
         }
 
         $updated = $service->update($device, $dto);
-
         return new JsonResponse($updated->toArray());
     }
 
-    #[Route('/devices/{id}', name: 'devices_info', methods: ['GET'])]
+    #[Route('/devices/{id}', methods: ['GET'])]
     public function info(int $id, DeviceService $service): JsonResponse
     {
         $device = $service->get($id);
 
         if (!$device) {
-            return new JsonResponse(['error' => 'Device not found']);
+            return new JsonResponse(['error' => 'Device not found'], 404);
         }
 
         return new JsonResponse($device->toArray());
