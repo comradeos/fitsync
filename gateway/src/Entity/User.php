@@ -64,4 +64,9 @@ class User
             'created_at' => $this->createdAt->format('Y-m-d H:i:s'),
         ];
     }
+
+    public function setName(?string $name): void
+    {
+        $this->name = $name;
+    }
 }

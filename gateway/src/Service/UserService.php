@@ -8,10 +8,10 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class UserService
+readonly class UserService
 {
     public function __construct(
-        private UserRepository $repository,
+        private UserRepository         $repository,
         private EntityManagerInterface $em
     ) {}
 
@@ -20,7 +20,6 @@ class UserService
         $user = new User(
             email: $dto->email,
             name: $dto->name,
-            createdAt: new \DateTimeImmutable()
         );
 
         $this->em->persist($user);
@@ -40,9 +39,18 @@ class UserService
         return $user;
     }
 
-    public function get(int $id): ?User
+    /**
+     * @return object|null
+     */
+    public function get(int $id): User | null
     {
-        return $this->repository->find($id);
+        $user = $this->repository->find($id);
+
+        if (is_null($user)) {
+            return null;
+        }
+
+        return $user;
     }
 
     public function getAll(): array
