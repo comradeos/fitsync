@@ -40,21 +40,61 @@ readonly class UserService
     }
 
     /**
-     * @return object|null
+     * @return ?object
      */
-    public function get(int $id): User | null
+    public function get(int $id): ?User
     {
-        $user = $this->repository->find($id);
-
-        if (is_null($user)) {
-            return null;
-        }
-
-        return $user;
+        return $this->repository->find($id);
     }
 
     public function getAll(): array
     {
         return $this->repository->findBy([], ['id' => 'ASC']);
+    }
+
+    /**
+     * @return ?object
+     */
+    public function getByEmail(string $email): ?User
+    {
+        return $this->repository->findOneBy(['email' => $email]);
+    }
+
+    public function validateCreate(CreateUserRequest $dto): ?string
+    {
+        if (!$dto->email) {
+            return "Email is required";
+        }
+
+        if (!filter_var($dto->email, FILTER_VALIDATE_EMAIL)) {
+            return "Invalid email format";
+        }
+
+        if ($this->getByEmail($dto->email) !== null) {
+            return "Email already exists";
+        }
+
+        if (!$dto->name) {
+            return "Name is required";
+        }
+
+        if (strlen($dto->name) < 2) {
+            return "Name must be at least 2 characters";
+        }
+
+        return null;
+    }
+
+    public function validateUpdate(UpdateUserRequest $dto): ?string
+    {
+        if ($dto->name == null) {
+            return "Name cannot be empty";
+        }
+
+        if (strlen($dto->name) < 2) {
+            return "Name must be at least 2 characters";
+        }
+
+        return null;
     }
 }

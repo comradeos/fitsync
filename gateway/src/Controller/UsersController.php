@@ -15,9 +15,7 @@ class UsersController
     public function list(UserService $service): JsonResponse
     {
         $users = $service->getAll();
-
         $data = array_map(fn($u) => $u->toArray(), $users);
-
         return new JsonResponse($data);
     }
 
@@ -28,19 +26,16 @@ class UsersController
 
         $dto = new CreateUserRequest();
         $dto->email = $data['email'] ?? null;
-        $dto->name = $data['name'] ?? null;
+        $dto->name  = $data['name'] ?? null;
 
-        if (!$dto->email || !filter_var($dto->email, FILTER_VALIDATE_EMAIL)) {
-            return new JsonResponse(['error' => 'Invalid email'], 400);
-        }
-
-        if (!$dto->name || strlen($dto->name) < 2) {
-            return new JsonResponse(['error' => 'Invalid name'], 400);
+        $error = $service->validateCreate($dto);
+        if ($error !== null) {
+            return new JsonResponse(['error' => $error]);
         }
 
         $user = $service->create($dto);
 
-        return new JsonResponse($user->toArray(), 201);
+        return new JsonResponse($user->toArray());
     }
 
     #[Route('/users/{id}', name: 'users_update', methods: ['PUT'])]
@@ -49,7 +44,7 @@ class UsersController
         $user = $service->get($id);
 
         if (!$user) {
-            return new JsonResponse(['error' => 'User not found'], 404);
+            return new JsonResponse(['error' => 'User not found']);
         }
 
         $data = $request->toArray();
@@ -57,12 +52,25 @@ class UsersController
         $dto = new UpdateUserRequest();
         $dto->name = $data['name'] ?? null;
 
-        if ($dto->name !== null && strlen($dto->name) < 2) {
-            return new JsonResponse(['error' => 'Invalid name'], 400);
+        $error = $service->validateUpdate($dto);
+        if ($error !== null) {
+            return new JsonResponse(['error' => $error]);
         }
 
         $updated = $service->update($user, $dto);
 
         return new JsonResponse($updated->toArray());
+    }
+
+    #[Route('/users/{id}', name: 'users_info', methods: ['GET'])]
+    public function info(int $id, UserService $service): JsonResponse
+    {
+        $user = $service->get($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        return new JsonResponse($user->toArray());
     }
 }
