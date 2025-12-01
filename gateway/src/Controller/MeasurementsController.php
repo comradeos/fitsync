@@ -40,11 +40,14 @@ class MeasurementsController
         $dto->unit       = $data['unit'] ?? null;
 
         $error = $service->validateCreate($dto);
-        if ($error) return new JsonResponse(['error' => $error], 400);
+
+        if ($error) {
+            return new JsonResponse(['error' => $error]);
+        }
 
         $measurement = $service->create($dto);
 
-        return new JsonResponse($measurement->toArray(), 201);
+        return new JsonResponse($measurement->toArray());
     }
 
     #[Route('/users/{id}/measurements', methods: ['GET'])]

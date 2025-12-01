@@ -41,45 +41,41 @@ readonly class MeasurementService
 
     public function validateCreate(CreateMeasurementRequest $dto): ?string
     {
-        if (!$dto->userId) {
-            return "user_id is required";
+        if (empty($dto->userId)) {
+            return 'user_id is required';
         }
 
-        $user = $this->userService->get($dto->userId);
-        if (!$user) {
-            return "User not found";
+        if (empty($dto->deviceId)) {
+            return 'device_id is required';
         }
 
-        if ($dto->deviceId !== null) {
-            $device = $this->deviceService->get($dto->deviceId);
-
-            if (!$device) {
-                return "Device not found";
-            }
+        if (empty($dto->type)) {
+            return 'type is required';
         }
 
-        if (!$dto->type) {
-            return "Type is required";
-        }
-
-        if (strlen($dto->type) < 2) {
-            return "type must be at least 2 characters";
+        if (!is_string($dto->type)) {
+            return 'type must be a string';
         }
 
         if ($dto->value === null) {
-            return "value is required";
+            return 'value is required';
         }
 
         if (!is_numeric($dto->value)) {
-            return "value must be a number";
+            return 'value must be a number';
         }
 
-        if (!$dto->unit) {
-            return "unit is required";
+        if (empty($dto->unit)) {
+            return 'unit is required';
+        }
+
+        if (!is_string($dto->unit)) {
+            return 'unit must be a string';
         }
 
         return null;
     }
+
 
     public function create(CreateMeasurementRequest $dto): Measurement
     {

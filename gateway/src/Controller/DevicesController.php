@@ -31,11 +31,11 @@ class DevicesController
 
         $error = $service->validateCreate($dto);
         if ($error !== null) {
-            return new JsonResponse(['error' => $error], 400);
+            return new JsonResponse(['error' => $error]);
         }
 
         $device = $service->create($dto);
-        return new JsonResponse($device->toArray(), 201);
+        return new JsonResponse($device->toArray());
     }
 
     #[Route('/devices/{id}', methods: ['PUT'])]
@@ -43,7 +43,7 @@ class DevicesController
     {
         $device = $service->get($id);
         if (!$device) {
-            return new JsonResponse(['error' => 'Device not found'], 404);
+            return new JsonResponse(['error' => 'Device not found']);
         }
 
         $data = $request->toArray();
@@ -53,7 +53,7 @@ class DevicesController
 
         $error = $service->validateUpdate($dto);
         if ($error !== null) {
-            return new JsonResponse(['error' => $error], 400);
+            return new JsonResponse(['error' => $error]);
         }
 
         $updated = $service->update($device, $dto);
@@ -66,7 +66,7 @@ class DevicesController
         $device = $service->get($id);
 
         if (!$device) {
-            return new JsonResponse(['error' => 'Device not found'], 404);
+            return new JsonResponse(['error' => 'Device not found']);
         }
 
         return new JsonResponse($device->toArray());
