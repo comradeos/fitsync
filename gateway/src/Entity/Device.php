@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\User;
 
 #[ORM\Entity]
 #[ORM\Table(name: "devices")]
@@ -12,23 +12,35 @@ class Device
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    private ?int $id = null {
+        get {
+            return $this->id;
+        }
+    }
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
     #[ORM\Column(type: "string", length: 50)]
-    private string $type;
+    public string $type {
+        set(?string $value) {
+            $this->type = $value;
+        }
+    }
 
     #[ORM\Column(type: "string", length: 100)]
-    private string $model;
+    public string $model {
+        set(?string $value) {
+            $this->model = $value;
+        }
+    }
 
     #[ORM\Column(type: "string", length: 255, unique: true)]
     private string $externalId;
 
     #[ORM\Column(type: "datetime_immutable")]
-    private \DateTimeImmutable $createdAt;
+    private DateTimeImmutable $createdAt;
 
     public function __construct(User $user, string $type, string $model, string $externalId)
     {
@@ -36,8 +48,19 @@ class Device
         $this->type = $type;
         $this->model = $model;
         $this->externalId = $externalId;
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
-    public function getId(): ?int { return $this->id; }
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'user_id' => $this->user->id,
+            'type' => $this->type,
+            'model' => $this->model,
+            'externalId' => $this->externalId,
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s')
+        ];
+    }
+
 }

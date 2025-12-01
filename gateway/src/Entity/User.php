@@ -12,7 +12,7 @@ class User
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private ?int $id = null {
+    public ?int $id = null {
         get {
             return $this->id;
         }
