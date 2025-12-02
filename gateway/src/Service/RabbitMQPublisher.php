@@ -12,25 +12,32 @@ class RabbitMQPublisher
     public function __construct()
     {
         $this->connection = new AMQPStreamConnection(
-            host: 'rabbitmq',
-            port: 5672,
-            user: 'fitsync',
-            password: 'fitsync'
+            'rabbitmq',
+            5672,
+            'fitsync',
+            'fitsync'
         );
     }
 
-    public function publish(string $queue, array $data): void
+    public function publish(string $routingKey, array $payload): void
     {
         $channel = $this->connection->channel();
 
-        $channel->queue_declare(
-            queue: $queue,
-            auto_delete: false
+        // declare exchange
+        $channel->exchange_declare(
+            'events',
+            'topic',
+            false,
+            true,
+            false
         );
 
-        $message = new AMQPMessage(json_encode($data));
+        $msg = new AMQPMessage(json_encode($payload), [
+            'content_type' => 'application/json',
+            'delivery_mode' => 2 // make message persistent
+        ]);
 
-        $channel->basic_publish($message, '', $queue);
+        $channel->basic_publish($msg, 'events', $routingKey);
 
         $channel->close();
     }
