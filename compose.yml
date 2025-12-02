@@ -10,15 +10,13 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    networks:
-      - backend
+    networks: [backend]
 
   redis:
     image: redis:7
     ports:
       - "6379:6379"
-    networks:
-      - backend
+    networks: [backend]
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -26,10 +24,9 @@ services:
       RABBITMQ_DEFAULT_USER: fitsync
       RABBITMQ_DEFAULT_PASS: fitsync
     ports:
-      - "15672:15672"
       - "5672:5672"
-    networks:
-      - backend
+      - "15672:15672"
+    networks: [backend]
 
   minio:
     image: minio/minio
@@ -40,47 +37,67 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    networks:
-      - backend
     volumes:
       - minio:/data
+    networks: [backend]
 
+  # --------------------------------------------
+  # GATEWAY (LIVE RELOAD)
+  # --------------------------------------------
   gateway:
     build: ./gateway
     volumes:
-      - ./gateway:/var/www
+      - ./gateway:/var/www   # live code
+    command: php -S 0.0.0.0:8080 -t public
     ports:
       - "8080:8080"
-    command: php -S 0.0.0.0:8080 -t public
-    networks:
-      - backend
     depends_on:
       - postgres
+      - rabbitmq
+    networks: [backend]
 
+  # --------------------------------------------
+  # DEVICES WORKER (PHP CLI)
+  # --------------------------------------------
   devices:
-    build:
-      context: ./devices
+    build: ./devices
+    working_dir: /var/www
+    volumes:
+      - ./devices:/var/www           # live code
+      - devices_vendor:/var/www/vendor  # persistent vendor
+    command: sh -c "composer install && php index.php"
     depends_on:
+      - rabbitmq
       - postgres
-      - rabbitmq
-    networks:
-      - backend
+    networks: [backend]
 
+  # --------------------------------------------
+  # NOTIFIER WORKER (PHP CLI)
+  # --------------------------------------------
   notifier:
-    build:
-      context: ./notifier
+    build: ./notifier
+    working_dir: /var/www
+    volumes:
+      - ./notifier:/var/www
+      - notifier_vendor:/var/www/vendor
+    command: sh -c "composer install && php worker.php"
     depends_on:
       - rabbitmq
-    networks:
-      - backend
+    networks: [backend]
 
+  # --------------------------------------------
+  # ANALYTICS (GO BINARY WITH AUTO-BUILD)
+  # --------------------------------------------
   analytics:
-    build:
-      context: ./analytics
+    build: ./analytics
+    working_dir: /app
+    volumes:
+      - ./analytics:/app    # live code
+    command: sh -c "go build -o analytics && ./analytics"
     depends_on:
       - rabbitmq
-    networks:
-      - backend
+    networks: [backend]
+
 
 networks:
   backend:
@@ -88,3 +105,5 @@ networks:
 volumes:
   pgdata:
   minio:
+  devices_vendor:
+  notifier_vendor:

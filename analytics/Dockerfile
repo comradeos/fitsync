@@ -1,9 +1,5 @@
 FROM golang:1.23
 
 WORKDIR /app
-COPY . .
 
-RUN go mod tidy
-RUN go build -o analytics
-
-CMD ["./analytics"]
+CMD ["sh", "-c", "go build -o analytics && ./analytics"]
