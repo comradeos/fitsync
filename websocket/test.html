@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>WS Test</h1>
+    <pre id="log"></pre>
+
+    <script>
+        let ws = new WebSocket("ws://localhost:9002");
+
+        ws.onmessage = e => {
+            document.getElementById("log").innerText += e.data + "\n";
+        };
+    </script>
+</body>
+</html>

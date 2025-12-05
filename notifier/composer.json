@@ -1,5 +1,7 @@
 {
   "name": "fitsync/notifier",
   "description": "Notifier service placeholder",
-  "require": {}
+  "require": {
+    "php-amqplib/php-amqplib": "^3.7"
+  }
 }

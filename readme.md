@@ -159,3 +159,7 @@ Go:
 ```bash
 docker compose exec analytics go test ./...
 ```
+
+
+
+http://localhost:8080/analytics/users/1/calories
