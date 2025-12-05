@@ -74,6 +74,14 @@ class NotificationConsumer
 
             echo "[EVENT] $body\n";
 
+            file_get_contents("http://websocket:9003", false, stream_context_create([
+                'http' => [
+                    'method'  => 'POST',
+                    'header'  => "Content-Type: application/json\r\n",
+                    'content' => $body,
+                ]
+            ]));
+
             file_put_contents(
                 '/var/www/notifier.log',
                 date('c') . " $body\n",

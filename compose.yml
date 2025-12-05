@@ -41,13 +41,10 @@ services:
       - minio:/data
     networks: [backend]
 
-  # --------------------------------------------
-  # GATEWAY (LIVE RELOAD)
-  # --------------------------------------------
   gateway:
     build: ./gateway
     volumes:
-      - ./gateway:/var/www   # live code
+      - ./gateway:/var/www
     command: php -S 0.0.0.0:8080 -t public
     ports:
       - "8080:8080"
@@ -56,24 +53,18 @@ services:
       - rabbitmq
     networks: [backend]
 
-  # --------------------------------------------
-  # DEVICES WORKER (PHP CLI)
-  # --------------------------------------------
   devices:
     build: ./devices
     working_dir: /var/www
     volumes:
-      - ./devices:/var/www           # live code
-      - devices_vendor:/var/www/vendor  # persistent vendor
+      - ./devices:/var/www
+      - devices_vendor:/var/www/vendor
     command: sh -c "composer install && php index.php"
     depends_on:
       - rabbitmq
       - postgres
     networks: [backend]
 
-  # --------------------------------------------
-  # NOTIFIER WORKER (PHP CLI)
-  # --------------------------------------------
   notifier:
     build: ./notifier
     working_dir: /var/www
@@ -85,19 +76,22 @@ services:
       - rabbitmq
     networks: [backend]
 
-  # --------------------------------------------
-  # ANALYTICS (GO BINARY WITH AUTO-BUILD)
-  # --------------------------------------------
   analytics:
     build: ./analytics
     working_dir: /app
     volumes:
-      - ./analytics:/app    # live code
+      - ./analytics:/app
     command: sh -c "go build -o analytics && ./analytics"
     depends_on:
       - rabbitmq
     networks: [backend]
 
+  websocket:
+    build: ./websocket
+    ports:
+      - "9002:9002"
+      - "9003:9003"
+    networks: [backend]
 
 networks:
   backend:
